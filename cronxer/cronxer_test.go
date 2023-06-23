@@ -48,18 +48,19 @@ func TestCronParser_Parse(t *testing.T) {
 
 	// Cron string with step values
 	cronString := "*/15 */2 1-10/2 * * /usr/bin/command"
-	expectedOutput := `Minute         00 15 30 45
+	expectedOutput := `
+Minute         00 15 30 45
 Hour           00 02 04 06 08 10 12 14 16 18 20 22
 Day of Month   01 03 05 07 09
 Month          *
 Day of Week    *
 Command        /usr/bin/command
-`
+	`
 	output, err := cronParser.Parse(cronString)
 	if err != nil {
 		t.Errorf("Error parsing cron string with step values: %v", err)
 	}
-	if output != expectedOutput {
+	if output != expectedOutput{
 		t.Errorf("Invalid output for cron string with step values\ngot:\n%s\nexpected:\n%s", output, expectedOutput)
 	}
 }

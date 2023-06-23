@@ -73,7 +73,9 @@ func (cp *CronParser) Parse(cronString string) (string, error) {
 
 func expandField(field string, min, max int) []string {
 	if field == "*" {
-		return generateRange(min, max, 1)
+		return []string{"*"}
+		//if we need all days use the below 
+		//return generateRange(min, max, 1)
 	}
 
 	parts := strings.Split(field, ",")
