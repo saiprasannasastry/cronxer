@@ -33,7 +33,7 @@ func TestValidateCronString(t *testing.T) {
 		{"* 0 1,15 * 1,13", false}, // Invalid month value (13)
 		{"* 0 1,15 * 1-13", false}, // Invalid month range (13)
 		{"* 0 1-15 * 1,15", false}, // Invalid day of week value (15)
-
+		{"*/15 */2 1-10/2 * * ", true},
 	}
 
 	for _, tc := range testCases {

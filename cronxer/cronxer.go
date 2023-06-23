@@ -79,7 +79,29 @@ func expandField(field string, min, max int) []string {
 	parts := strings.Split(field, ",")
 	result := []string{}
 	for _, part := range parts {
-		if strings.Contains(part, "/") {
+		if strings.Contains(part, "/") && strings.Contains(part, "-") {
+			// Handle the case where both range and step are present
+			rangeAndStepParts := strings.Split(part, "/")
+			rangePart := rangeAndStepParts[0]
+			stepPart := rangeAndStepParts[1]
+
+			rangeParts := strings.Split(rangePart, "-")
+			start, err := strconv.Atoi(rangeParts[0])
+			if err != nil {
+				return nil
+			}
+			end, err := strconv.Atoi(rangeParts[1])
+			if err != nil {
+				return nil
+			}
+
+			step, err := strconv.Atoi(stepPart)
+			if err != nil {
+				return nil
+			}
+
+			result = append(result, generateRange(start, end, step)...)
+		} else if strings.Contains(part, "/") {
 			step, err := strconv.Atoi(strings.Split(part, "/")[1])
 			if err != nil {
 				return nil
@@ -101,7 +123,9 @@ func expandField(field string, min, max int) []string {
 			if err != nil {
 				return nil
 			}
-			result = append(result, fmt.Sprintf("%02d", value))
+			if value >= min && value <= max {
+				result = append(result, fmt.Sprintf("%02d", value))
+			}
 		}
 	}
 
