@@ -50,18 +50,19 @@ func validateField(field string, min, max int) error {
 	parts := strings.Split(field, ",")
 	for _, part := range parts {
 		if strings.Contains(part, "/") {
-			stepParts := strings.Split(part, "/")
-			if len(stepParts) != 2 {
+			rangeAndStep := strings.Split(part, "/")
+			if len(rangeAndStep) != 2 {
 				return fmt.Errorf("invalid step value in field: %s", field)
 			}
 
-			rangeField := stepParts[0]
-			step, err := strconv.Atoi(stepParts[1])
-			if err != nil || step <= 0 || step > max-min+1 {
-				return fmt.Errorf("invalid step value in field: %s (step must be a positive integer less than or equal to %d)", field, max-min+1)
+			rangeField := rangeAndStep[0]
+			stepField := rangeAndStep[1]
+
+			if err := validateStepField(stepField, min, max); err != nil {
+				return err
 			}
 
-			if err := validateRange(rangeField, min, max, step); err != nil {
+			if err := validateRangeField(rangeField, min, max, stepField); err != nil {
 				return err
 			}
 		} else if strings.Contains(part, "-") {
@@ -91,46 +92,45 @@ func validateField(field string, min, max int) error {
 	return nil
 }
 
-func validateRange(rangeStr string, min, max, step int) error {
-	if rangeStr == "*" {
-		return nil
-	}
-
-	if strings.Contains(rangeStr, "-") {
-		rangeParts := strings.Split(rangeStr, "-")
-		if len(rangeParts) != 2 {
-			return fmt.Errorf("invalid range value in field: %s", rangeStr)
-		}
-
-		start, err := strconv.Atoi(rangeParts[0])
-		if err != nil || start < min || start > max {
-			return fmt.Errorf("invalid range value in field: %s (start must be a number between %d and %d)", rangeStr, min, max)
-		}
-
-		end, err := strconv.Atoi(rangeParts[1])
-		if err != nil || end < min || end > max || end < start {
-			return fmt.Errorf("invalid range value in field: %s (end must be a number between %d and %d)", rangeStr, min, max)
-		}
-
-		for value := start; value <= end; value += step {
-			if (value-min)%step != 0 {
-				return fmt.Errorf("invalid range value in field: %s (value must be a multiple of %d between %d and %d)", rangeStr, step, min, max)
-			}
-		}
-	} else {
-		value, err := strconv.Atoi(rangeStr)
-		if err != nil || value < min || value > max {
-			return fmt.Errorf("invalid range value in field: %s", rangeStr)
-		}
-
-		if (value-min)%step != 0 {
-			return fmt.Errorf("invalid range value in field: %s (value must be a multiple of %d between %d and %d)", rangeStr, step, min, max)
-		}
+func validateStepField(stepField string, min, max int) error {
+	step, err := strconv.Atoi(stepField)
+	if err != nil || step <= 0 || step > max-min+1 {
+		return fmt.Errorf("invalid step value in field: %s (step must be a positive integer less than or equal to %d)", stepField, max-min+1)
 	}
 
 	return nil
 }
 
+func validateRangeField(rangeField string, min, max int, stepField string) error {
+	if rangeField == "*" {
+		return nil
+	}
+
+	rangeParts := strings.Split(rangeField, "-")
+	if len(rangeParts) != 2 {
+		return fmt.Errorf("invalid range value in field: %s", rangeField)
+	}
+
+	start, err := strconv.Atoi(rangeParts[0])
+	if err != nil || start < min || start > max {
+		return fmt.Errorf("invalid range value in field: %s (start must be a number between %d and %d)", rangeField, min, max)
+	}
+
+	end, err := strconv.Atoi(rangeParts[1])
+	if err != nil || end < min || end > max || end < start {
+		return fmt.Errorf("invalid range value in field: %s (end must be a number between %d and %d)", rangeField, min, max)
+	}
+
+	//This is an addidtional validation which is commented
+	//but https://crontab.guru/#1-10/12_3-5/2_7-10/2_11-12/2_0-6/2 says its a valid cron/
+	// "1-10/12 2-4/2 7-10/3 10-12/2 0-6/3 /usr/bin/command" in general makes no sense to have step greater than start
+	// step, _ := strconv.Atoi(stepField)
+	// if step >end{
+	// 	return fmt.Errorf("invalid step range in field %s (step must be a number between %d and %d)",rangeField,start,end)
+	// }
+
+	return nil
+}
 func validateCommandField(field string) error {
 
 	return nil

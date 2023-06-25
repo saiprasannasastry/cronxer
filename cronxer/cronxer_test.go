@@ -85,8 +85,12 @@ Command       /usr/bin/command
 			expectedErr:  false,
 			errorMessage: "",
 		},
-
-
+		{
+			cronString: "*/30 1-24 * * *",
+			expected: "",
+			expectedErr:  true,
+			errorMessage: "invalid minute field",
+		},
 	}
 
 	for _, c := range cases {
