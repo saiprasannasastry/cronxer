@@ -39,6 +39,7 @@ command       /usr/bin/find
 ```
 
 BenchmarkParse-12    	  186549	      6144 ns/op	    2574 B/op	      88 allocs/op
+BenchmarkValidateCronString-12    	 2420242	       453.6 ns/op	     224 B/op	       6 allocs/op
 
 
 ```
