@@ -105,3 +105,14 @@ Command       /usr/bin/command
 		}
 	}
 }
+
+func BenchmarkParse(b *testing.B) {
+	cp := New()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_, err := cp.Parse("1-10/2 3-5/2 7-10/2 11-12/2 0-6/2 /usr/bin/command")
+		if err != nil {
+			b.Errorf("parsing failed: %v", err)
+		}
+	}
+}

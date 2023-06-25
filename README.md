@@ -35,6 +35,13 @@ day of week   1 2 3 4 5
 command       /usr/bin/find
 ```
 
+# Benchmarking
+```
+
+BenchmarkParse-12    	  186549	      6144 ns/op	    2574 B/op	      88 allocs/op
+
+
+```
 # Notes
 - This application only supports the standard cron format with five time fields and a command. Special time strings such as "@yearly" are not supported.
 - The cron string should be provided as a single argument enclosed in quotes.

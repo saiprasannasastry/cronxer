@@ -48,3 +48,14 @@ func TestValidateCronString(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkValidateCronString(b *testing.B) {
+	cronString := "*/5 * 1,15 * 1-5 /usr/bin/command"
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		err := validateCronString(cronString)
+		if err != nil {
+			b.Errorf("validation failed: %v", err)
+		}
+	}
+}
