@@ -20,6 +20,11 @@ func TestValidateCronString(t *testing.T) {
 		{"1-9 2-4/2 7-10/3 10-12/2 0-6/3 /usr/bin/command", true},
 		{"1-10/2 3-5/2 7-10/2 11-12/2 0-6/2 /usr/bin/command", true},
 		{"*/15 */2 1-10/2 * * ", true},
+		{"0 0 1 1 *",true},
+		{"0 0 1 * *",true},
+		{"0 0 * * 0",true},
+		{"0 0 * * *",true},
+		{"0 0-23 * * *",true},
 
 		// Invalid cron strings
 		{"", false}, // Empty string
