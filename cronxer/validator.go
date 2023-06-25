@@ -5,7 +5,8 @@ import (
 	"strconv"
 	"strings"
 )
-//https://crontab.guru/
+
+// https://crontab.guru/
 func validateCronString(cronString string) error {
 	fields := strings.Fields(cronString)
 

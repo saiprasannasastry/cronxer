@@ -71,75 +71,89 @@ func (cp *CronParser) Parse(cronString string) (string, error) {
 	return generateTable(headers, schedules, command), nil
 }
 
-//expand fields expands all cases of cron string and returns a resulting array of fields
+// expand fields expands all cases of cron string and returns a resulting array of fields
 func expandField(field string, min, max int) []string {
 	if field == "*" {
 		return []string{"*"}
-		//if we need all days use the below 
-		//return generateRange(min, max, 1)
 	}
 
 	parts := strings.Split(field, ",")
-	result := []string{}
+	result := make([]string, 0)
+
 	for _, part := range parts {
-		if strings.Contains(part, "/") && strings.Contains(part, "-") {
-			// Handle the case where both range and step are present
-			rangeAndStepParts := strings.Split(part, "/")
-			rangePart := rangeAndStepParts[0]
-			stepPart := rangeAndStepParts[1]
-
-			rangeParts := strings.Split(rangePart, "-")
-			start, err := strconv.Atoi(rangeParts[0])
-			if err != nil {
-				return nil
-			}
-			end, err := strconv.Atoi(rangeParts[1])
-			if err != nil {
-				return nil
-			}
-
-			step, err := strconv.Atoi(stepPart)
-			if err != nil {
-				return nil
-			}
-
-			result = append(result, generateRange(start, end, step)...)
-		} else if strings.Contains(part, "/") {
-			step, err := strconv.Atoi(strings.Split(part, "/")[1])
-			if err != nil {
-				return nil
-			}
-			result = append(result, generateRange(min, max, step)...)
-		} else if strings.Contains(part, "-") {
-			rangeParts := strings.Split(part, "-")
-			start, err := strconv.Atoi(rangeParts[0])
-			if err != nil {
-				return nil
-			}
-			end, err := strconv.Atoi(rangeParts[1])
-			if err != nil {
-				return nil
-			}
-			result = append(result, generateRange(start, end, 1)...)
-		} else {
-			value, err := strconv.Atoi(part)
-			if err != nil {
-				return nil
-			}
-			if value >= min && value <= max {
-				result = append(result, fmt.Sprintf("%02d", value))
-			}
+		expandedValues, err := expandPart(part, min, max)
+		if err != nil {
+			return nil
 		}
+		result = append(result, expandedValues...)
 	}
 
 	return result
 }
 
-func generateRange(start, end, step int) []string {
-	result := []string{}
-	for i := start; i <= end; i += step {
-		result = append(result, fmt.Sprintf("%02d", i))
+// expandPart expands a single part of the cron field and returns the resulting values
+func expandPart(part string, min, max int) ([]string, error) {
+	if strings.Contains(part, "/") && strings.Contains(part, "-") {
+		// Handle the case where both range and step are present
+		rangeAndStepParts := strings.Split(part, "/")
+		rangePart := rangeAndStepParts[0]
+		stepPart := rangeAndStepParts[1]
+
+		rangeParts := strings.Split(rangePart, "-")
+		start, err := strconv.Atoi(rangeParts[0])
+		if err != nil {
+			return nil, err
+		}
+		end, err := strconv.Atoi(rangeParts[1])
+		if err != nil {
+			return nil, err
+		}
+
+		step, err := strconv.Atoi(stepPart)
+		if err != nil {
+			return nil, err
+		}
+
+		return generateRange(start, end, step), nil
+	} else if strings.Contains(part, "/") {
+		step, err := strconv.Atoi(strings.Split(part, "/")[1])
+		if err != nil {
+			return nil, err
+		}
+		return generateRange(min, max, step), nil
+	} else if strings.Contains(part, "-") {
+		rangeParts := strings.Split(part, "-")
+		start, err := strconv.Atoi(rangeParts[0])
+		if err != nil {
+			return nil, err
+		}
+		end, err := strconv.Atoi(rangeParts[1])
+		if err != nil {
+			return nil, err
+		}
+		return generateRange(start, end, 1), nil
+	} else {
+		value, err := strconv.Atoi(part)
+		if err != nil {
+			return nil, err
+		}
+		if value >= min && value <= max {
+			return []string{fmt.Sprintf("%02d", value)}, nil
+		}
 	}
+
+	return nil, errors.New("invalid cron field")
+}
+
+// generateRange generates values in the given range between start and end
+func generateRange(start, end, step int) []string {
+	result := make([]string, 0)
+
+	for current := start; current <= end; current += step {
+		value := fmt.Sprintf("%02d", current)
+		result = append(result, value)
+	}
+
 	return result
 }
 

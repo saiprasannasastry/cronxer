@@ -1,7 +1,7 @@
 package cronxer
 
 import (
-//	"strings"
+	//	"strings"
 	"testing"
 )
 
@@ -25,7 +25,7 @@ Command       /usr/bin/command
 `,
 			expectedErr:  false,
 			errorMessage: "",
- 		},
+		},
 		{
 			cronString: "*/15 2-4,6-8 1,3,5,7,9 1-12 0-6 /usr/bin/command",
 			expected: `Minute        00 15 30 45
@@ -62,15 +62,15 @@ Command       /usr/bin/command
 			errorMessage: "",
 		},
 		{
-			cronString: "*/30 1-24 foo * *",
-			expected:    "",
-			expectedErr: true,
+			cronString:   "*/30 1-24 foo * *",
+			expected:     "",
+			expectedErr:  true,
 			errorMessage: "string value in cron field",
 		},
 		{
-			cronString: "* * * *",
-			expected:    "",
-			expectedErr: true,
+			cronString:   "* * * *",
+			expected:     "",
+			expectedErr:  true,
 			errorMessage: "incomplete cron string",
 		},
 		{
@@ -86,8 +86,8 @@ Command       /usr/bin/command
 			errorMessage: "",
 		},
 		{
-			cronString: "*/30 1-24 * * *",
-			expected: "",
+			cronString:   "*/30 1-24 * * *",
+			expected:     "",
 			expectedErr:  true,
 			errorMessage: "invalid minute field",
 		},
