@@ -71,6 +71,7 @@ func (cp *CronParser) Parse(cronString string) (string, error) {
 	return generateTable(headers, schedules, command), nil
 }
 
+//expand fields expands all cases of cron string and returns a resulting array of fields
 func expandField(field string, min, max int) []string {
 	if field == "*" {
 		return []string{"*"}
@@ -142,6 +143,7 @@ func generateRange(start, end, step int) []string {
 	return result
 }
 
+// generateTable takes in schedules and returns a string builder
 func generateTable(headers []string, schedules [][]string, command string) string {
 	maxHeaderLength := getMaxHeaderLength(headers)
 	var output strings.Builder
