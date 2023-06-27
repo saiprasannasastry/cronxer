@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const (
@@ -18,7 +19,7 @@ const (
 )
 
 const (
-	timeFormat       = "Jan _2 15:04"
+	timeFormat = "Jan _2, 2006 15:04"
 	minutesField     = "Minute"
 	hoursField       = "Hour"
 	daysOfMonthField = "Day of Month"
@@ -181,4 +182,77 @@ func getMaxHeaderLength(headers []string) int {
 		}
 	}
 	return maxHeaderLength
+}
+
+func (cp *CronParser) GetNextCronJobs(cronString string) (string, error) {
+
+	fields := strings.Fields(cronString)
+
+	if len(fields) < numFields-1 || len(fields) > numFields {
+		return "", errors.New("invalid cron string")
+	}
+	err := validateCronString(cronString)
+	if err != nil {
+		return "", err
+	}
+
+	schedules := make([][]string, numFields-1)
+	schedules[minutesPos] = expandField(fields[minutesPos], 0, 59)
+	schedules[hoursPos] = expandField(fields[hoursPos], 0, 23)
+	schedules[daysOfMonthPos] = expandField(fields[daysOfMonthPos], 1, 31)
+	schedules[monthsPos] = expandField(fields[monthsPos], 1, 12)
+	schedules[daysOfWeekPos] = expandField(fields[daysOfWeekPos], 0, 6)
+
+	currentTime := time.Now()
+	currentTimeFormat := currentTime.Format(timeFormat)
+	nextJob ,_ := getNextJob(schedules, currentTime)
+	nextJobFormatter := nextJob.Format(timeFormat)
+
+	fmt.Printf("current Time %v\n Next Time %v \n",currentTimeFormat,nextJobFormatter)
+	return "",nil
+
+}
+func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) {
+	//currentTime = currentTime.Add(time.Minute)
+	for {
+		//18:
+		currentMinute := strconv.Itoa(currentTime.Minute())
+		currentHour := strconv.Itoa(currentTime.Hour())
+		currentDayofTheMonth := strconv.Itoa(currentTime.Day())
+		if currentDayofTheMonth == "28"{
+		}
+		currentMonth := strconv.Itoa(int(currentTime.Month()))
+		currentWeek := strconv.Itoa(int(currentTime.Weekday()))
+		//fmt.Println(currentMinute,currentHour,currentDayofTheMonth,currentMonth,currentWeek)
+
+		scheduleMinute := schedules[minutesPos]
+		scheduleHour := schedules[hoursPos]
+		scheduleDayOftheMonth := schedules[daysOfMonthPos]
+		scheduleMonth := schedules[monthsPos]
+		scheduleWeek := schedules[daysOfWeekPos]
+
+		if isScheduled(scheduleMinute, currentMinute) &&
+			isScheduled(scheduleHour, currentHour) && 
+			isScheduled(scheduleDayOftheMonth, currentDayofTheMonth) && isScheduled(scheduleMonth, currentMonth) && isScheduled(scheduleWeek, currentWeek) {
+			return currentTime, nil
+		}
+		// if shceduledDay == currentDay && currentHour > scheduledHour {
+			
+			//continue
+		//}
+		currentTime = currentTime.Add(time.Minute)
+	}
+	return time.Time{},nil
+}
+func isScheduled(schedule []string, value string) bool {
+
+	for _, sched := range schedule {
+		if strings.HasPrefix(sched, "0") {
+			sched = sched[1:]
+		}
+		if sched == value || sched == "*" {
+			return true
+		}
+	}
+	return false
 }

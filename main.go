@@ -22,4 +22,7 @@ func main() {
 
 	fmt.Println(output)
 
+	parser.GetNextCronJobs(cronString)
 }
+//5 next times.
+// "* 0 1,15 * 1-5" "5"
