@@ -213,9 +213,7 @@ func (cp *CronParser) GetNextCronJobs(cronString string) (string, error) {
 
 }
 func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) {
-	//currentTime = currentTime.Add(time.Minute)
 	for {
-		//18:
 		currentMinute := strconv.Itoa(currentTime.Minute())
 		currentHour := strconv.Itoa(currentTime.Hour())
 		currentDayofTheMonth := strconv.Itoa(currentTime.Day())
@@ -223,7 +221,6 @@ func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) 
 		}
 		currentMonth := strconv.Itoa(int(currentTime.Month()))
 		currentWeek := strconv.Itoa(int(currentTime.Weekday()))
-		//fmt.Println(currentMinute,currentHour,currentDayofTheMonth,currentMonth,currentWeek)
 
 		scheduleMinute := schedules[minutesPos]
 		scheduleHour := schedules[hoursPos]
@@ -236,13 +233,8 @@ func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) 
 			isScheduled(scheduleDayOftheMonth, currentDayofTheMonth) && isScheduled(scheduleMonth, currentMonth) && isScheduled(scheduleWeek, currentWeek) {
 			return currentTime, nil
 		}
-		// if shceduledDay == currentDay && currentHour > scheduledHour {
-			
-			//continue
-		//}
 		currentTime = currentTime.Add(time.Minute)
 	}
-	return time.Time{},nil
 }
 func isScheduled(schedule []string, value string) bool {
 
