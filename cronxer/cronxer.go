@@ -19,7 +19,7 @@ const (
 )
 
 const (
-	timeFormat = "Jan _2, 2006 15:04"
+	timeFormat       = "Jan _2, 2006 15:04"
 	minutesField     = "Minute"
 	hoursField       = "Hour"
 	daysOfMonthField = "Day of Month"
@@ -184,16 +184,16 @@ func getMaxHeaderLength(headers []string) int {
 	return maxHeaderLength
 }
 
-func (cp *CronParser) GetNextCronJobs(cronString string) (string, error) {
+func (cp *CronParser) GetNextCronJobs(cronString string, n int) ([]string, error) {
 
 	fields := strings.Fields(cronString)
 
 	if len(fields) < numFields-1 || len(fields) > numFields {
-		return "", errors.New("invalid cron string")
+		return nil, errors.New("invalid cron string")
 	}
 	err := validateCronString(cronString)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	schedules := make([][]string, numFields-1)
@@ -204,20 +204,26 @@ func (cp *CronParser) GetNextCronJobs(cronString string) (string, error) {
 	schedules[daysOfWeekPos] = expandField(fields[daysOfWeekPos], 0, 6)
 
 	currentTime := time.Now()
-	currentTimeFormat := currentTime.Format(timeFormat)
-	nextJob ,_ := getNextJob(schedules, currentTime)
-	nextJobFormatter := nextJob.Format(timeFormat)
+	nextJobs := make([]string, 0, n)
+	for i := 0; i < n; i++ {
+		nextJob, err := getNextJob(schedules, currentTime)
+		if err != nil {
+			return nil, err
+		}
+		nextJobFormatter := nextJob.Format(timeFormat)
+		nextJobs = append(nextJobs, nextJobFormatter)
 
-	fmt.Printf("current Time %v\n Next Time %v \n",currentTimeFormat,nextJobFormatter)
-	return "",nil
-
+		currentTime = nextJob.Add(time.Minute)
+	}
+	return nextJobs, nil
 }
+
 func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) {
 	for {
 		currentMinute := strconv.Itoa(currentTime.Minute())
 		currentHour := strconv.Itoa(currentTime.Hour())
 		currentDayofTheMonth := strconv.Itoa(currentTime.Day())
-		if currentDayofTheMonth == "28"{
+		if currentDayofTheMonth == "28" {
 		}
 		currentMonth := strconv.Itoa(int(currentTime.Month()))
 		currentWeek := strconv.Itoa(int(currentTime.Weekday()))
@@ -229,11 +235,13 @@ func getNextJob(schedules [][]string, currentTime time.Time) (time.Time, error) 
 		scheduleWeek := schedules[daysOfWeekPos]
 
 		if isScheduled(scheduleMinute, currentMinute) &&
-			isScheduled(scheduleHour, currentHour) && 
+			isScheduled(scheduleHour, currentHour) &&
 			isScheduled(scheduleDayOftheMonth, currentDayofTheMonth) && isScheduled(scheduleMonth, currentMonth) && isScheduled(scheduleWeek, currentWeek) {
 			return currentTime, nil
 		}
+
 		currentTime = currentTime.Add(time.Minute)
+
 	}
 }
 func isScheduled(schedule []string, value string) bool {

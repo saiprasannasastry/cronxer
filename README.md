@@ -35,6 +35,40 @@ day of week   1 2 3 4 5
 command       /usr/bin/find
 ```
 
+# Testing
+```
+package main
+
+import (
+	"fmt"
+	crx "github.com/segmentio/cron-parser/cronxer"
+	"os"
+)
+
+func main() {
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: go run main.go <cron-string>")
+		return
+	}
+
+	cronString := os.Args[1]
+	parser := crx.New()
+	output, err := parser.Parse(cronString)
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	fmt.Println(output)
+
+    //next 5 jobs
+	nextJobs, _ :=parser.GetNextCronJobs(cronString,5)
+	for _, job := range nextJobs {
+		fmt.Println(job)
+	}
+
+}
+```
 # Benchmarking
 ```
 
@@ -47,3 +81,4 @@ BenchmarkValidateCronString-12    	 2420242	       453.6 ns/op	     224 B/op	   
 - This application only supports the standard cron format with five time fields and a command. Special time strings such as "@yearly" are not supported.
 - The cron string should be provided as a single argument enclosed in quotes.
 - The application does not rely on existing cron parser libraries but implements its own logic to parse and expand the cron schedule.
+- The cron parser also returns the next n available jobs

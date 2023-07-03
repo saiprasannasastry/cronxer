@@ -22,7 +22,11 @@ func main() {
 
 	fmt.Println(output)
 
-	parser.GetNextCronJobs(cronString)
+	nextJobs, _ :=parser.GetNextCronJobs(cronString,5)
+	for _, job := range nextJobs {
+		fmt.Println(job)
+	}
+
 }
 //5 next times.
 // "* 0 1,15 * 1-5" "5"
